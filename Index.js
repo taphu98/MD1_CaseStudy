@@ -1,6 +1,5 @@
 /*** CONSTANT ***/
 let audio1 = new Audio('audio/vaoHa.mp3')
-audio1.play();
 let audio2 = new Audio('audio/oidoioi.mp3')
 const COLS = 10; //cột
 const ROWS = 20; //dòng
@@ -215,7 +214,9 @@ class Board {
     }
 
     generateWhiteBoard() {
+
         return Array.from({ length: ROWS }, () => Array(COLS).fill(WHITE_COLOR_ID));
+
     }
 
     drawCell(xAxis, yAxis, colorId) {
@@ -238,6 +239,7 @@ class Board {
     }
 
     drawBoard() {
+        audio1.play();
         for (let row = 0; row < this.grid.length; row++) {
             for (let col = 0; col < this.grid[0].length; col++) {
                 this.drawCell(col, row, this.grid[row][col]);
