@@ -1,8 +1,11 @@
 /*** CONSTANT ***/
-const COLS = 10;
-const ROWS = 20;
-const BLOCK_SIZE = 30;
-const COLOR_MAPPING = [
+let audio1 = new Audio('audio/vaoHa.mp3')
+audio1.play();
+let audio2 = new Audio('audio/oidoioi.mp3')
+const COLS = 10; //cột
+const ROWS = 20; //dòng
+const BLOCK_SIZE = 30; //size của 1 khối
+const COLOR_MAPPING = [ //màu của các hình
     'red',
     'orange',
     'green',
@@ -186,10 +189,10 @@ const KEY_CODES = {
 };
 
 const WHITE_COLOR_ID = 7;
-
+//vẽ bảng để chơi
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
-
+// chiều rộng và chiều dài của bảng
 ctx.canvas.width = COLS * BLOCK_SIZE;
 ctx.canvas.height = ROWS * BLOCK_SIZE;
 
@@ -201,7 +204,7 @@ class Board {
         this.gameOver = false;
         this.isPlaying = false;
 
-        this.clearAudio = new Audio();
+        this.clearAudio = new Audio('audio/sounds_clear.wav');
     }
 
     reset() {
@@ -262,12 +265,14 @@ class Board {
     handleScore(newScore) {
         this.score+= newScore;
         document.getElementById('score').innerHTML = this.score;
-        let audio = new Audio()
+
     }
 
     handleGameOver() {
         this.gameOver = true;
         this.isPlaying = false;
+        audio1.pause();
+        audio2.play();
         alert('GAME OVER!!!');
     }
 }
