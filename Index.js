@@ -1,10 +1,19 @@
 /*** CONSTANT ***/
-let audio1 = new Audio('audio/vaoHa.mp3')
+// nhạc nền
+let audio1 = new Audio('audio/remix.mp3')
+// nhạc khi chết
 let audio2 = new Audio('audio/oidoioi.mp3')
+// mảng chứa điểm
+let scoreArray = [];
+
 const COLS = 10; //cột
 const ROWS = 20; //dòng
-const BLOCK_SIZE = 30; //size của 1 khối
-const COLOR_MAPPING = [ //màu của các hình
+
+//size của 1 khối
+const BLOCK_SIZE = 30;
+
+//màu của các hình
+const COLOR_MAPPING = [
     'red',
     'orange',
     'green',
@@ -15,6 +24,7 @@ const COLOR_MAPPING = [ //màu của các hình
     'white',
 ];
 
+// hình dạng và các trường hợp của khối gạch
 const BRICK_LAYOUT = [
     [
         [
@@ -180,6 +190,7 @@ const BRICK_LAYOUT = [
     ],
 ];
 
+// mã khóa mũi tên
 const KEY_CODES = {
     LEFT: 'ArrowLeft',
     RIGHT: 'ArrowRight',
@@ -187,14 +198,18 @@ const KEY_CODES = {
     DOWN: 'ArrowDown',
 };
 
+// đặt màu trắng là 7
 const WHITE_COLOR_ID = 7;
+
 //vẽ bảng để chơi
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
+
 // chiều rộng và chiều dài của bảng
 ctx.canvas.width = COLS * BLOCK_SIZE;
 ctx.canvas.height = ROWS * BLOCK_SIZE;
 
+// tạo lớp Board
 class Board {
     constructor(ctx) {
         this.ctx = ctx;
@@ -206,6 +221,7 @@ class Board {
         this.clearAudio = new Audio('audio/sounds_clear.wav');
     }
 
+    // khi reset thì
     reset() {
         this.score = 0;
         this.grid = this.generateWhiteBoard();
@@ -213,33 +229,28 @@ class Board {
         this.drawBoard();
     }
 
+    // tạo bảng trắng
     generateWhiteBoard() {
 
-        return Array.from({ length: ROWS }, () => Array(COLS).fill(WHITE_COLOR_ID));
+        return Array.from({length: ROWS}, () => Array(COLS).fill(WHITE_COLOR_ID));
 
     }
 
+    // vẽ ô
     drawCell(xAxis, yAxis, colorId) {
         // xAxis => 1 yAxis => 1
         this.ctx.fillStyle =
             COLOR_MAPPING[colorId] || COLOR_MAPPING[WHITE_COLOR_ID];
-        this.ctx.fillRect(
-            xAxis * BLOCK_SIZE,
-            yAxis * BLOCK_SIZE,
-            BLOCK_SIZE,
-            BLOCK_SIZE
+        this.ctx.fillRect(xAxis * BLOCK_SIZE, yAxis * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
         );
         this.ctx.fillStyle = 'black';
-        this.ctx.strokeRect(
-            xAxis * BLOCK_SIZE,
-            yAxis * BLOCK_SIZE,
-            BLOCK_SIZE,
-            BLOCK_SIZE
+        this.ctx.strokeRect(xAxis * BLOCK_SIZE, yAxis * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
         );
     }
 
+    // vẽ bảng
     drawBoard() {
-        audio1.play();
+
         for (let row = 0; row < this.grid.length; row++) {
             for (let col = 0; col < this.grid[0].length; col++) {
                 this.drawCell(col, row, this.grid[row][col]);
@@ -247,35 +258,45 @@ class Board {
         }
     }
 
+    //hàm ăn được dòng
     handleCompleteRows() {
         const latestGrid = board.grid.filter((row) => { // row => []
             return row.some(col => col === WHITE_COLOR_ID);
         });
 
         const newScore = ROWS - latestGrid.length; // => newScore = tong cong hang da hoan thanh
-        const newRows = Array.from({ length: newScore }, () => Array(COLS).fill(WHITE_COLOR_ID));
+        const newRows = Array.from({length: newScore}, () => Array(COLS).fill(WHITE_COLOR_ID));
 
         if (newScore) {
             board.grid = [...newRows, ...latestGrid];
-            this.handleScore(newScore * 10);
+            this.handleScore(newScore * 100);
 
             this.clearAudio.play();
             console.log({latestGrid});
         }
     }
 
+    //Xử lí khi ghi điểm
     handleScore(newScore) {
-        this.score+= newScore;
+        this.score += newScore;
         document.getElementById('score').innerHTML = this.score;
 
     }
 
+    //xử lí khi GameOver
     handleGameOver() {
         this.gameOver = true;
         this.isPlaying = false;
+        scoreArray.push(this.score);
+        scoreArray.sort(function (a,b){return b-a});
+        console.log(scoreArray);
+        document.getElementById('top1').innerHTML = scoreArray[0];
+        document.getElementById('top2').innerHTML = scoreArray[1];
+        document.getElementById('top3').innerHTML = scoreArray[2]
         audio1.pause();
         audio2.play();
         alert('GAME OVER!!!');
+
     }
 }
 
@@ -308,42 +329,27 @@ class Brick {
         }
     }
 
+    // di chuyển trái
     moveLeft() {
-        if (
-            !this.checkCollision(
-                this.rowPos,
-                this.colPos - 1,
-                this.layout[this.activeIndex]
-            )
-        ) {
+        if (!this.checkCollision(this.rowPos, this.colPos - 1, this.layout[this.activeIndex])) {
             this.clear();
             this.colPos--;
             this.draw();
         }
     }
 
+    // di chuyển phải
     moveRight() {
-        if (
-            !this.checkCollision(
-                this.rowPos,
-                this.colPos + 1,
-                this.layout[this.activeIndex]
-            )
-        ) {
+        if (!this.checkCollision(this.rowPos, this.colPos + 1, this.layout[this.activeIndex])) {
             this.clear();
             this.colPos++;
             this.draw();
         }
     }
 
+    //di chuyển xuống
     moveDown() {
-        if (
-            !this.checkCollision(
-                this.rowPos + 1,
-                this.colPos,
-                this.layout[this.activeIndex]
-            )
-        ) {
+        if (!this.checkCollision(this.rowPos + 1, this.colPos, this.layout[this.activeIndex])) {
             this.clear();
             this.rowPos++;
             this.draw();
@@ -355,14 +361,9 @@ class Brick {
         generateNewBrick();
     }
 
+    //chuyển dạng của khối gạch
     rotate() {
-        if (
-            !this.checkCollision(
-                this.rowPos,
-                this.colPos,
-                this.layout[(this.activeIndex + 1) % 4]
-            )
-        ) {
+        if (!this.checkCollision(this.rowPos, this.colPos, this.layout[(this.activeIndex + 1) % 4])) {
             this.clear();
             this.activeIndex = (this.activeIndex + 1) % 4;
             /**
@@ -377,18 +378,14 @@ class Brick {
         }
     }
 
+    //CHECK va chạm
     checkCollision(nextRow, nextCol, nextLayout) {
         // if (nextCol < 0) return true;
 
         for (let row = 0; row < nextLayout.length; row++) {
             for (let col = 0; col < nextLayout[0].length; col++) {
                 if (nextLayout[row][col] !== WHITE_COLOR_ID && nextRow >= 0) {
-                    if (
-                        col + nextCol < 0 ||
-                        col + nextCol >= COLS ||
-                        row + nextRow >= ROWS ||
-                        board.grid[row+nextRow][col+nextCol] !== WHITE_COLOR_ID
-                    )
+                    if (col + nextCol < 0 || col + nextCol >= COLS || row + nextRow >= ROWS || board.grid[row + nextRow][col + nextCol] !== WHITE_COLOR_ID)
                         return true;
                 }
             }
@@ -397,6 +394,7 @@ class Brick {
         return false;
     }
 
+    // xử lí khi gạch hạ cánh
     handleLanded() {
         if (this.rowPos <= 0) {
             board.handleGameOver();
@@ -417,6 +415,7 @@ class Brick {
     }
 }
 
+// tạo ra khối gạch mới
 function generateNewBrick() {
     brick = new Brick(Math.floor(Math.random() * 10) % BRICK_LAYOUT.length); // tao ra 1 id bat ki nam tu 0 -> 6
 }
@@ -424,7 +423,11 @@ function generateNewBrick() {
 board = new Board(ctx);
 board.drawBoard();
 
+// bắt sự kiên click nút play, khi ấn vào thì reset lại bảng
+
+// thao tác với nút play
 document.getElementById('play').addEventListener('click', () => {
+    audio1.play();
     board.reset();
 
     board.isPlaying = true;
@@ -437,13 +440,13 @@ document.getElementById('play').addEventListener('click', () => {
         } else {
             clearInterval(refresh);
         }
-    }, 1000);
+    }, 800);
 })
 
-
+// bắt sự kiện bàn phím
 document.addEventListener('keydown', (e) => {
     if (!board.gameOver && board.isPlaying) {
-        console.log({ e });
+        console.log({e});
         switch (e.code) {
             case KEY_CODES.LEFT:
                 brick.moveLeft();
@@ -468,3 +471,11 @@ document.addEventListener('keydown', (e) => {
 // board.drawCell(1, 1, 1);
 
 console.table(board.grid);
+
+function playMusic() {
+    audio1.play();
+}
+function pauseMusic(){
+    audio1.pause();
+    audio1.currentTime = 0;
+}

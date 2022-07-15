@@ -8,7 +8,7 @@ body {
 .container {
     display: grid;
     grid-template-columns: 320px 200px;
-    justify-content: center;
+    justify-content: center; /*căn chỉnh các mục của vùng chứa linh hoạt theo chiều ngang */
     margin-top: 100px;
 }
 
@@ -27,4 +27,15 @@ body {
     font-size: 16px;
     padding: 15px 30px;
     cursor: pointer;
+}
+table  {
+    width: 100%;
+    padding: 10px;
+    border-spacing: 15px;
+}
+h2{
+    text-align: center;
+}
+ol{
+    text-align: center;
 }
